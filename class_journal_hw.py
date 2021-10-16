@@ -20,6 +20,24 @@ class Student:
         else:
             return 'Ошибка'
  
+    def average_rate(self):
+        
+        summ = 0
+        count = 0
+        
+        for _, grades in self.grades.items():
+            # for grade in grades:
+            #     sum += grade
+            #     count += 1
+            summ += sum(grades)
+            count += len(grades)
+        
+        result = summ / count
+        return result
+
+    def __str__(self):
+        result = f"Имя: {self.name}\nФамилия: {self.surname}\nСредняя оценка за домашние задания: {self.average_rate()}\nКурсы в процессе изучения: {', '.join(self.courses_in_progress)}\nЗавершенные курсы: {', '.join(self.finished_courses)}"
+        return result
      
 class Mentor:
 
@@ -34,6 +52,45 @@ class Lecturer(Mentor):
         Mentor.__init__(self, name, surname)
         self.marks = {}
 
+    def average_rate(self):
+        
+        summ = 0
+        count = 0
+        
+        for _, grades in self.marks.items():
+            # for grade in grades:
+            #     sum += grade
+            #     count += 1
+            summ += sum(grades)
+            count += len(grades)
+
+        result = summ / count
+        return result
+
+    def __str__(self):
+        result = f'Имя: {self.name}\nФамилия: {self.surname}\nСредняя оценка за лекции: {self.average_rate()}'
+        return result
+
+    def __lt__(self, other):
+        if not isinstance(other, Student):
+            print('Not a Student!')
+            return
+        if self.average_rate() == Student.average_rate(other):
+            print('Средние оценки равнозначны')
+            return
+        else:
+            return self.average_rate() < Student.average_rate(other)
+
+    def __gt__(self, other):
+        if not isinstance(other, Student):
+            print('Not a Student!')
+            return
+
+        if self.average_rate() == Student.average_rate(other):
+            return 'Средние оценки равнозначны'
+
+        else:
+            return self.average_rate() > Student.average_rate(other)        
 class Reviewer(Mentor):
     
     def __init__(self, name, surname):
@@ -48,10 +105,16 @@ class Reviewer(Mentor):
         else:
             return 'Ошибка'
 
+    def __str__(self):
+        result = f'Имя: {self.name}\nФамилия: {self.surname}'
+        return result
+
 best_student = Student('Ruoy', 'Eman', 'your_gender')
 best_student.courses_in_progress += ['Python']
+best_student.courses_in_progress += ['Git']
+best_student.finished_courses += ['Введение в программирование']
 
-mentor_gy = Lecturer('Nik', 'Pashinyan')
+mentor_gy = Lecturer('Tom', 'Soer')
 mentor_gy.courses_attached += ['Python']
 
 cool_reviewer = Reviewer('Some', 'Buddy')
@@ -61,8 +124,12 @@ cool_reviewer.rate_hw(best_student, 'Python', 10)
 cool_reviewer.rate_hw(best_student, 'Python', 10)
 cool_reviewer.rate_hw(best_student, 'Python', 10)
 
-best_student.marks_lecturer(mentor_gy, 'Python', 8)
+best_student.marks_lecturer(mentor_gy, 'Python', 10)
 
 print(best_student.grades)
-print()
+print(best_student)
 print(mentor_gy.marks)
+# print(cool_reviewer)
+print(mentor_gy)
+# mentor_gy.average_rate()
+print(mentor_gy > best_student)
