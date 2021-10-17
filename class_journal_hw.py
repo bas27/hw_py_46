@@ -38,14 +38,13 @@ class Student:
     def __str__(self):
         result = f"Имя: {self.name}\nФамилия: {self.surname}\nСредняя оценка за домашние задания: {self.average_rate()}\nКурсы в процессе изучения: {', '.join(self.courses_in_progress)}\nЗавершенные курсы: {', '.join(self.finished_courses)}"
         return result
-     
+    
 class Mentor:
 
     def __init__(self, name, surname):
         self.name = name
         self.surname = surname
         self.courses_attached = []
-        
 class Lecturer(Mentor):
 
     def __init__(self, name, surname):
@@ -109,27 +108,88 @@ class Reviewer(Mentor):
         result = f'Имя: {self.name}\nФамилия: {self.surname}'
         return result
 
+
+# студенты
 best_student = Student('Ruoy', 'Eman', 'your_gender')
 best_student.courses_in_progress += ['Python']
 best_student.courses_in_progress += ['Git']
 best_student.finished_courses += ['Введение в программирование']
 
+stud_ent1 = Student('Din', 'Go', 'gen')
+stud_ent1.courses_in_progress += ['Java']
+stud_ent1.courses_in_progress += ['Python']
+stud_ent1.finished_courses += ['C']
+
+#преподаватели
 mentor_gy = Lecturer('Tom', 'Soer')
 mentor_gy.courses_attached += ['Python']
+mentor_gy.courses_attached += ['C']
 
+cool_mentor = Lecturer('Frans', 'Iosif')
+cool_mentor.courses_attached += ['Python']
+cool_mentor.courses_attached += ['Java']
+
+# проверяющие
 cool_reviewer = Reviewer('Some', 'Buddy')
 cool_reviewer.courses_attached += ['Python']
+cool_reviewer.courses_attached += ['Java']
 
+#Оценки за домашнюю работу студуентам
 cool_reviewer.rate_hw(best_student, 'Python', 10)
 cool_reviewer.rate_hw(best_student, 'Python', 10)
 cool_reviewer.rate_hw(best_student, 'Python', 10)
 
+cool_reviewer.rate_hw(stud_ent1, 'Python', 9)
+cool_reviewer.rate_hw(stud_ent1, 'Python', 8)
+cool_reviewer.rate_hw(stud_ent1, 'Java', 10)
+
+#студенты оценивают преподавателей
 best_student.marks_lecturer(mentor_gy, 'Python', 10)
+best_student.marks_lecturer(cool_mentor, 'Python', 9)
+stud_ent1.marks_lecturer(mentor_gy, 'Python', 6)
+stud_ent1.marks_lecturer(cool_mentor, 'Python', 10)
 
-print(best_student.grades)
+# вычисляем средние оценки по студентам и лекторам
+st_list = [best_student, stud_ent1]
+lect_list = [mentor_gy, cool_mentor]
+
+def avg_hw_st (lst_students, course):
+
+    tmp = []
+
+    for student in lst_students:
+        tmp.extend(student.grades[course])
+
+    result = sum(tmp) / len(tmp)
+    return result
+
+def avg_lecturer (lst_lecturers, course):
+
+    tmp = []
+
+    for lecturer in lst_lecturers:
+        tmp.extend(lecturer.marks[course])
+
+    result = sum(tmp) / len(tmp)
+    return result
+
+print(avg_hw_st(st_list, 'Python'))
+print(avg_lecturer(lect_list, 'Python'))
+
+# print(best_student.grades)
+# print(stud_ent1.grades)
+print()
 print(best_student)
+print(stud_ent1)
+print()
 print(mentor_gy.marks)
-# print(cool_reviewer)
+print(cool_mentor.marks)
+print()
+print(cool_reviewer)
 print(mentor_gy)
-# mentor_gy.average_rate()
+print(cool_mentor)
+print()
+mentor_gy.average_rate()
+cool_mentor.average_rate
+print()
 print(mentor_gy > best_student)
