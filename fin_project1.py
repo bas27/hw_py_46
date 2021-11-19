@@ -1,9 +1,6 @@
-from os import path, write
+from progress.bar import IncrementalBar
 import requests
 import json
-
-from pprint import pprint
-
 class SocialNet:
     url_api_vk = 'https://api.vk.com/method/'
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
@@ -21,7 +18,8 @@ class SocialNet:
             'Authorization': f'OAuth {self.token_ya}'
         }
         self.album = album
-    def get_photo(self, user_id):
+    
+    def get_photo(self, user_id, n):
 
         params = {
             'owner_id': user_id,
@@ -35,15 +33,18 @@ class SocialNet:
         response = requests.get(self.url_api_vk + 'photos.get', params=params).json()['response']['items']
 
         photo_dict = {}
-        
+        count = 0
+
         for i in response:
-                            
-            if i['likes']['count'] in photo_dict:
 
-                photo_dict[f"{i['likes']['count']}_{i['date']}"] = [i['sizes'][-1]['url'], i['sizes'][-1]['type']]
+            count += 1
+            if count <= n:
+                if i['likes']['count'] in photo_dict:
 
-            else:
-                photo_dict[i['likes']['count']] = [i['sizes'][-1]['url'], i['sizes'][-1]['type']]
+                    photo_dict[f"{i['likes']['count']}_{i['date']}"] = [i['sizes'][-1]['url'], i['sizes'][-1]['type']]
+
+                else:
+                    photo_dict[i['likes']['count']] = [i['sizes'][-1]['url'], i['sizes'][-1]['type']]
 
         return photo_dict
 
@@ -63,25 +64,21 @@ class SocialNet:
         '''Загрузка файлов на Ядиск
         n - количество фотографий
         '''
-        upload_photo = self.get_photo(user_id)
+        upload_photo = self.get_photo(user_id, n)
         self.create_ya_dir(user_id)
         ya_dir = f'photo_{user_id}_{self.album}'
-        count = 0
+        bar = IncrementalBar('Upload', max = len(upload_photo))
         
         for file_name, val in upload_photo.items():
 
-            count += 1
-            params = {
-                'path': f'/{ya_dir}/{file_name}.jpg',
-                'url': val[0],
-                'overwrite': 'true'
-                }
-            if count <= n:
-
-                r = requests.post(f'{self.url_api_ya}/upload/', headers=self.headers, params=params)
-                r.raise_for_status()
-                if r.status_code == 202:
-                    print(f"Копирование выполнено - {file_name}.jpg")
+                params = {
+                    'path': f'/{ya_dir}/{file_name}.jpg',
+                    'url': val[0],
+                    'overwrite': 'true'
+                    }
+                
+                requests.post(f'{self.url_api_ya}/upload/', headers=self.headers, params=params)
+                bar.next()
                 
                 log_list = [{
                     "file_name": f'{file_name}.jpg',
