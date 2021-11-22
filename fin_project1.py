@@ -1,6 +1,10 @@
 from progress.bar import IncrementalBar
 import requests
 import json
+'''
+pip install progress
+'''
+
 class SocialNet:
     url_api_vk = 'https://api.vk.com/method/'
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
@@ -45,6 +49,8 @@ class SocialNet:
 
                 else:
                     photo_dict[i['likes']['count']] = [i['sizes'][-1]['url'], i['sizes'][-1]['type']]
+            else:
+                break
 
         return photo_dict
 
@@ -58,7 +64,6 @@ class SocialNet:
             print(f'Каталог "photo_{user_id}_{self.album}" создан')
         else:
             print(f'Проблемы при создании каталога, код ошибки - {req.status_code}')
-        return
         
     def ya_upload(self, user_id, n=5):
         '''Загрузка файлов на Ядиск
@@ -68,7 +73,8 @@ class SocialNet:
         self.create_ya_dir(user_id)
         ya_dir = f'photo_{user_id}_{self.album}'
         bar = IncrementalBar('Upload', max = len(upload_photo))
-        
+        log_list = []
+         
         for file_name, val in upload_photo.items():
 
                 params = {
@@ -80,13 +86,15 @@ class SocialNet:
                 requests.post(f'{self.url_api_ya}/upload/', headers=self.headers, params=params)
                 bar.next()
                 
-                log_list = [{
-                    "file_name": f'{file_name}.jpg',
+                tmp_dict = {
+                    "file_name": f'{file_name}.jpg', 
                     "size": val[1]
-                }]
+                }
+                
+                log_list.append(tmp_dict)
 
-                with open('backup_log.txt', 'a') as file:
-                    json.dump(log_list, file)
+        with open('backup_log.json', 'w') as file:
+            json.dump(log_list, file)
 
 
 if __name__ == '__main__': 
