@@ -1,4 +1,4 @@
-from progress.bar import IncrementalBar
+from tqdm import tqdm
 import requests
 import json
 '''
@@ -8,7 +8,7 @@ pip install progress
 class SocialNet:
     url_api_vk = 'https://api.vk.com/method/'
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
-    token_vk = ''
+    token_vk = 'dd00edfda7de89db298e70a3ca353a1e7135aa4c5df2d54eaf78aee68f5d2e03a565c04524fd3535eba33'
 
     def __init__(self, token_ya, album='profile'):
         '''
@@ -72,27 +72,27 @@ class SocialNet:
         upload_photo = self.get_photo(user_id, n)
         self.create_ya_dir(user_id)
         ya_dir = f'photo_{user_id}_{self.album}'
-        bar = IncrementalBar('Upload', max = len(upload_photo))
         log_list = []
-         
-        for file_name, val in upload_photo.items():
 
-                params = {
-                    'path': f'/{ya_dir}/{file_name}.jpg',
-                    'url': val[0],
-                    'overwrite': 'true'
+        with tqdm(total=len(upload_photo), ascii=True, desc="Copy photo") as pbar: 
+            for file_name, val in upload_photo.items():
+
+                    params = {
+                        'path': f'/{ya_dir}/{file_name}.jpg',
+                        'url': val[0],
+                        'overwrite': 'true'
+                        }
+                    
+                    requests.post(f'{self.url_api_ya}/upload/', headers=self.headers, params=params)
+
+                    pbar.update()
+                    tmp_dict = {
+                        "file_name": f'{file_name}.jpg', 
+                        "size": val[1]
                     }
-                
-                requests.post(f'{self.url_api_ya}/upload/', headers=self.headers, params=params)
-                bar.next()
-                
-                tmp_dict = {
-                    "file_name": f'{file_name}.jpg', 
-                    "size": val[1]
-                }
-                
-                log_list.append(tmp_dict)
-
+                    
+                    log_list.append(tmp_dict)
+        
         with open('backup_log.json', 'w') as file:
             json.dump(log_list, file)
 
