@@ -1,14 +1,12 @@
 from tqdm import tqdm
 import requests
 import json
-'''
-pip install progress
-'''
+
 
 class SocialNet:
     url_api_vk = 'https://api.vk.com/method/'
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
-    token_vk = 'dd00edfda7de89db298e70a3ca353a1e7135aa4c5df2d54eaf78aee68f5d2e03a565c04524fd3535eba33'
+    token_vk = ''
 
     def __init__(self, token_ya, album='profile'):
         '''
