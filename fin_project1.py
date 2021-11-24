@@ -1,18 +1,9 @@
 from tqdm import tqdm
 import requests
 import json
-<<<<<<< HEAD
-=======
-
->>>>>>> 270266b52179153c75e9ed91e6c58087b7fca084
-
 
 class VK:
     url_api_vk = 'https://api.vk.com/method/'
-<<<<<<< HEAD
-=======
-    url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
->>>>>>> 270266b52179153c75e9ed91e6c58087b7fca084
     token_vk = ''
 
     def __init__(self, album='profile'):
