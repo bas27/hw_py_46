@@ -1,6 +1,7 @@
 from tqdm import tqdm
 import requests
 import json
+import hashlib
 
 class VK:
     url_api_vk = 'https://api.vk.com/method/'
@@ -49,7 +50,55 @@ class VK:
 
         return photo_dict
 
+class OK:
+    URL = 'https://api.ok.ru/fb.do'
+    token = ''
+    session_secret_key = ''
+        
+    def __init__(self):
 
+        self.params = {
+            'application_key': '',
+            'access_token': self.token,
+            'format': 'json',
+            }
+
+    def get_photo(self, user_id, n=5):
+        
+        self.user_id = user_id
+        custom_params = {
+        'fid': self.user_id,
+        'method': 'photos.getPhotos'
+        }
+
+        str_sig = f"application_key={self.params['application_key']}fid={custom_params['fid']}format={self.params['format']}method={custom_params['method']}{self.session_secret_key}"
+
+        hash_object = hashlib.md5(str_sig.encode())
+
+        signature = hash_object.hexdigest()
+
+        params_sig = {
+            'sig': signature
+        }
+
+        response = requests.get(self.URL, params={**self.params, **custom_params, **params_sig}).json()['photos']
+
+        photo_dict = {}
+        count_name = 0
+        count_n = 0
+
+        for i in response:
+            
+            count_n += 1
+            if count_n <= n:
+                if i['mark_count'] in photo_dict:
+                    count_name += 1
+                    photo_dict[f"{i['mark_count']}_{count_name}"] = [i['pic640x480'],'pic640x480']
+                else:
+                    photo_dict[i['mark_count']] = [i['pic640x480'],'pic640x480']
+            else:
+                break
+        return photo_dict
 class YaDisk:
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
 
@@ -105,17 +154,24 @@ class YaDisk:
 
 
 if __name__ == '__main__':
+    choise_net = input('Выберем социальную сеть: 1. ВК, 2. ОК: ')
     token = input('Введите токен яндекс диска: ')
-    vk_user_id = int(input('Введите id пользователя VK: '))
-    YaDisk(token, vk_user_id).create_ya_dir()
+    user_id = int(input('Введите id пользователя: '))
+    YaDisk(token, user_id).create_ya_dir()
     choise_number = input(
         'Изменить количество сохраняемых фотографий (по-умолчанию 5), Y/N (default-N, press Enter): ')
 
     if choise_number.lower() == 'y':
         num_photos = int(input('Укажите количество сохраняемых фотографий: '))
-        upload_photo = VK().get_photo(vk_user_id, num_photos)
-        YaDisk(token, vk_user_id).ya_upload(upload_photo)
+        if choise_net == '1':
+            upload_photo = VK().get_photo(user_id, num_photos)
+        elif choise_net == '2':
+            upload_photo = OK().get_photo(user_id, num_photos)
+        YaDisk(token, user_id).ya_upload(upload_photo)
 
     else:
-        upload_photo = VK().get_photo(vk_user_id)
-        YaDisk(token, vk_user_id).ya_upload(upload_photo)
+        if choise_net == '1':
+            upload_photo = VK().get_photo(user_id)
+        elif choise_net == '2':
+            upload_photo = OK().get_photo(user_id)
+        YaDisk(token, user_id).ya_upload(upload_photo)
