@@ -5,9 +5,8 @@ import hashlib
 
 class VK:
     url_api_vk = 'https://api.vk.com/method/'
-    token_vk = ''
-
-    def __init__(self, album='profile'):
+ 
+    def __init__(self, token, album='profile'):
         '''
         wall — фотографии со стены;
         profile — фотографии профиля;
@@ -15,12 +14,13 @@ class VK:
         '''
 
         self.album = album
-
-    def get_photo(self, user_id, n=5):
+        self.token = token
+    
+    def get_photo(self, user_id, n):
 
         params = {
             'owner_id': user_id,
-            'access_token': self.token_vk,
+            'access_token': self.token,
             'v': '5.131',
             'album_id': self.album,
             'photo_size': 'True',
@@ -99,6 +99,8 @@ class OK:
             else:
                 break
         return photo_dict
+
+
 class YaDisk:
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
 
@@ -154,24 +156,23 @@ class YaDisk:
 
 
 if __name__ == '__main__':
-    choise_net = input('Выберем социальную сеть: 1. ВК, 2. ОК: ')
+    choise_net = input('Выберите социальную сеть: 1. ВК, 2. ОК: ')
+    token_vk = input('Введите токен VK: ')
     token = input('Введите токен яндекс диска: ')
     user_id = int(input('Введите id пользователя: '))
-    YaDisk(token, user_id).create_ya_dir()
+    
     choise_number = input(
         'Изменить количество сохраняемых фотографий (по-умолчанию 5), Y/N (default-N, press Enter): ')
-
     if choise_number.lower() == 'y':
         num_photos = int(input('Укажите количество сохраняемых фотографий: '))
-        if choise_net == '1':
-            upload_photo = VK().get_photo(user_id, num_photos)
-        elif choise_net == '2':
-            upload_photo = OK().get_photo(user_id, num_photos)
-        YaDisk(token, user_id).ya_upload(upload_photo)
-
     else:
-        if choise_net == '1':
-            upload_photo = VK().get_photo(user_id)
-        elif choise_net == '2':
-            upload_photo = OK().get_photo(user_id)
-        YaDisk(token, user_id).ya_upload(upload_photo)
+        num_photos = 5
+    
+    YaDisk(token, user_id).create_ya_dir()
+    
+    if choise_net == '1':
+        upload_photo = VK(token_vk).get_photo(user_id, num_photos)
+    elif choise_net == '2':
+        upload_photo = OK().get_photo(user_id, num_photos)
+    
+    YaDisk(token, user_id).ya_upload(upload_photo)
