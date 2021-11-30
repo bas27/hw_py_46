@@ -100,7 +100,8 @@ class OK:
                 break
         return photo_dict
 
-
+    def getAlbums(self):
+        pass
 class YaDisk:
     url_api_ya = 'https://cloud-api.yandex.net/v1/disk/resources'
 
