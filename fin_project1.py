@@ -1,3 +1,5 @@
+from os import name
+from pprint import pprint
 from tqdm import tqdm
 import requests
 import json
@@ -52,42 +54,78 @@ class VK:
 
 class OK:
     URL = 'https://api.ok.ru/fb.do'
-    token = ''
-    session_secret_key = ''
         
-    def __init__(self):
-
+    def __init__(self, token, session_secret_key, application_key):
+        self.token = token
+        self.session_secret_key = session_secret_key
+        self.application_key = application_key
         self.params = {
-            'application_key': '',
+            'application_key': self.application_key,
             'access_token': self.token,
             'format': 'json',
             }
+        self.sig_tmp = f"application_key={self.params['application_key']}format={self.params['format']}{self.session_secret_key}"
 
-    def get_photo(self, user_id, n=5):
-        
+    def get_hash(self, str_for_hash):
+        hash_object = hashlib.md5(str_for_hash.encode())
+        return hash_object.hexdigest()
+    
+    def get_photo(self, user_id, albums=None):
+        '''
+        albums - список идентификаторов альбомов 
+        '''
+        self.albums = albums
         self.user_id = user_id
+        
         custom_params = {
         'fid': self.user_id,
         'method': 'photos.getPhotos'
         }
 
-        str_sig = f"application_key={self.params['application_key']}fid={custom_params['fid']}format={self.params['format']}method={custom_params['method']}{self.session_secret_key}"
+        
+        if self.albums:
+            all_photos = []
+            for albums_id in self.albums:
 
-        hash_object = hashlib.md5(str_sig.encode())
+                str_sig = f"aid={albums_id}detectTotalCount=truefid={custom_params['fid']}method={custom_params['method']}{self.sig_tmp}"
+                
+                params = {
+                    'sig': self.get_hash(str_sig),
+                    'detectTotalCount': 'true',
+                    'aid': albums_id
+                }
 
-        signature = hash_object.hexdigest()
+                response = requests.get(self.URL, params={**self.params, **custom_params, **params}).json()
 
-        params_sig = {
-            'sig': signature
-        }
+                if response['hasMore'] == 'true':
+                    str_sig = f"{self.sig_tmp}aid={albums_id}fid={custom_params['fid']}method={custom_params['method']}count={response['totalCount']}"
 
-        response = requests.get(self.URL, params={**self.params, **custom_params, **params_sig}).json()['photos']
+                    params = {
+                    'sig': self.get_hash(str_sig),
+                    'count': response['totalCount'],
+                    'aid': albums_id
+                    }
+                    response = requests.get(self.URL, params={**self.params, **custom_params, **params}).json()['photos']
+
+                    all_photos.append(response) 
+                    n = len(all_photos)
+                elif response['hasMore'] == 'false':
+                    all_photos.append(response['photos'])
+                    n = len(all_photos)
+        else:
+            str_sig = f"{self.sig_tmp}detectTotalCount=truefid={custom_params['fid']}method={custom_params['method']}"
+                
+            params = {
+                'sig': self.get_hash(str_sig),
+            }
+
+            all_photos = requests.get(self.URL, params={**self.params, **custom_params, **params}).json()['photos']
 
         photo_dict = {}
         count_name = 0
         count_n = 0
 
-        for i in response:
+        for i in all_photos:
             
             count_n += 1
             if count_n <= n:
@@ -98,7 +136,7 @@ class OK:
                     photo_dict[i['mark_count']] = [i['pic640x480'],'pic640x480']
             else:
                 break
-        return photo_dict
+        pprint(photo_dict)
 
     def getAlbums(self):
         pass
@@ -158,22 +196,26 @@ class YaDisk:
 
 if __name__ == '__main__':
     choise_net = input('Выберите социальную сеть: 1. ВК, 2. ОК: ')
-    token_vk = input('Введите токен VK: ')
-    token = input('Введите токен яндекс диска: ')
+    access_token = input('Введите access_token: ')
+    if choise_net == '2':
+        session_sec_key = input('Введите Session_secret_key: ')
+        app_key = input('Введите Публичный ключ приложения: ')
+    ya_token = input('Введите токен яндекс диска: ')
     user_id = int(input('Введите id пользователя: '))
     
-    choise_number = input(
-        'Изменить количество сохраняемых фотографий (по-умолчанию 5), Y/N (default-N, press Enter): ')
-    if choise_number.lower() == 'y':
-        num_photos = int(input('Укажите количество сохраняемых фотографий: '))
-    else:
-        num_photos = 5
+    OK(access_token, session_sec_key, app_key).get_photo(user_id, [864781883252])
+    # choise_number = input(
+    #     'Изменить количество сохраняемых фотографий (по-умолчанию 5), Y/N (default-N, press Enter): ')
+    # if choise_number.lower() == 'y':
+    #     num_photos = int(input('Укажите количество сохраняемых фотографий: '))
+    # else:
+    #     num_photos = 5
     
-    YaDisk(token, user_id).create_ya_dir()
+    # YaDisk(ya_token, user_id).create_ya_dir()
     
-    if choise_net == '1':
-        upload_photo = VK(token_vk).get_photo(user_id, num_photos)
-    elif choise_net == '2':
-        upload_photo = OK().get_photo(user_id, num_photos)
+    # if choise_net == '1':
+    #     upload_photo = VK(access_token).get_photo(user_id, num_photos)
+    # elif choise_net == '2':
+    #     upload_photo = OK(access_token, session_sec_key, app_key).get_photo(user_id, num_photos)
     
-    YaDisk(token, user_id).ya_upload(upload_photo)
+    # YaDisk(ya_token, user_id).ya_upload(upload_photo)
