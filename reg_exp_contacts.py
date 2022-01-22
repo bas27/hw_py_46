@@ -4,6 +4,21 @@ import csv
 import re
 import pandas as pd
 
+class Nested_iter:
+    def __init__(self,nested_list):
+        self.start = -1
+        self.end = len(nested_list)
+        self.list = nested_list
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.start += 1
+        if self.start == self.end:
+            raise StopIteration
+        x = self.list[self.start]
+        for elem in x:
+          print(elem)
 
 # print(os.listdir())
 with open('phonebook_raw.csv', encoding='UTF8') as f:
@@ -20,7 +35,10 @@ with open('phonebook_raw.csv', encoding='UTF8') as f:
   for el in contacts_list:
       tmp = []
       tel_num = re.sub(r"(\+7|8)\s*\(?(\d{3})\)?-?\s*(\d{3})-?(\d{2})-?(\d+)(\s*)(\(?(доб.)\)?\s(\d+)\)?)?", r"+7(\2)\3-\4-\5\6\8\9", el[5])
-      
+      # ln = 
+      # for elem in Nested_iter(new_list):
+      # for contact in new_list:
+
       tmp.append(el[0].split()[0])        
       if len(el[0].split()) == 3:
         tmp.append(el[0].split()[1])
@@ -44,7 +62,8 @@ with open('phonebook_raw.csv', encoding='UTF8') as f:
       
       new_list.append(tmp)
 
-  
+  for elem in Nested_iter(new_list):
+    elem
 
 
 
@@ -52,11 +71,11 @@ with open('phonebook_raw.csv', encoding='UTF8') as f:
 
   # df = df.groupby('0')
   # pprint(out)
-  out_list = []
+  # out_list = []
   
-  for contact in new_list:
+  # for contact in new_list:
     
-    print(contact[0])
+  #   print(contact[0])
     
     # print(tmp)
 
