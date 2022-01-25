@@ -26,10 +26,7 @@ HEADER = {
 
 def get_word(text):
     pattern = re.compile(r'\w+')
-    return pattern.findall(text)
-
-def get_word(text):
-    pattern = re.compile(r'\w+')
+    
     return pattern.findall(text)
 
 def get_html_text(url):
@@ -37,13 +34,11 @@ def get_html_text(url):
     response = requests.get(url, headers=HEADER)
     html_text = response.text
     html_soup = BeautifulSoup(html_text, 'html.parser')
-
-    return [text.lower() for text in html_soup.stripped_strings]
-
+    
+    return html_soup.get_text('\n', strip='True')
+    
 
 def main(keywords, url):
-
-    KEYWORDS = ['дизайн', 'фото', 'web', 'python']
 
     base_url = 'https://habr.com/ru/all'
     urls = []
@@ -52,7 +47,7 @@ def main(keywords, url):
     while len(urls) > 0:
         
         url = urls.pop(0)
-        # print(url)
+        
         req = requests.get(url, headers=HEADER)
         req.raise_for_status()
         text = req.text
@@ -82,15 +77,11 @@ def main(keywords, url):
             
                 print(f"{time.get('title')} - {title.text} - {url}")
                 for word in keywords:
-                    html_text = []
-                    tmp = get_html_text(url)
-                    # html_text.extend()
-                    print(tmp)
-                    # if word in html_text:
-                    #     print(f'{word} - {html_text.count(word)}')
+                    html_text = get_word(get_html_text(url).lower())
+                   
+                    if word in html_text:
+                        print(f'{word} - {html_text.count(word)}')
                 
-                # an_txt = [get_word(text) for text in get_html_text(url)]
-                # print(an_txt)
                 print('------------')
 
         if soup.find(id='pagination-next-page').get('href'):
@@ -98,19 +89,5 @@ def main(keywords, url):
             urls.append(next_page)
 
 
-# def get_url_title(url_sites):
-#     url = []
-#     for article in get_articles(url_sites):
-#         title = article.find('h2')
-#         url.append('https://habr.com' + title.find('a').get('href'))
-#     return url
-
 if __name__ == '__main__':
     main(['дизайн', 'фото', 'web', 'python'], 'https://habr.com/ru/all/')
-    # print(get_articles('https://habr.com/ru/all/'))
-    # print(get_url_title('https://habr.com/ru/all/'))
-
-
-# # KEYWORDS = ['дизайн', 'фото', 'web', 'python', 'html']
-
-# 'https://habr.com/ru/all/'
