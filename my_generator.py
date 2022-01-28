@@ -9,8 +9,8 @@ def flat_generator(some_list):
         for i in custom_list:
             yield i
 
-# for item in flat_generator(nested_list):
-# 	print(item)
+for item in flat_generator(nested_list):
+	print(item)
 
-my_list = [item for item in flat_generator(nested_list)]
-print(my_list)
+# my_list = [item for item in flat_generator(nested_list)]
+# print(my_list)
