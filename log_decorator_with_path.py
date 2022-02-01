@@ -17,4 +17,3 @@ def add_log_to_function(log_file):
             return result
         return logs
     return log_decorator
-

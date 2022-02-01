@@ -14,11 +14,3 @@ def log_decorator(some_function):
 
         return old_result
     return logs
-
-@log_decorator
-def my_test(name):
-    print('Мой тест', name)
-    return 'Finish', name
-
-
-my_test('Ваня')
