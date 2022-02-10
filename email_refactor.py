@@ -13,7 +13,6 @@ class Gmail:
         self.GMAIL_IMAP = "imap.gmail.com"
         self.login = login_mail_box
         self.password = password_mail_box
-    #send message
 
     def send_message(self, recipients, subject, text_message):
         msg = MIMEMultipart()
